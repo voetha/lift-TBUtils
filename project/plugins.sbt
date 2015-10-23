@@ -1,8 +1,6 @@
 // SBT Eclipse
 resolvers += Classpaths.typesafeResolver
 
-addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "2.1.1")
-
 // xsbt-web-plugin
 resolvers ++= Seq(
   "Web plugin repo" at "http://siasia.github.com/maven2",
