@@ -5,8 +5,24 @@ import scala.xml.transform._
 import net.liftweb.common.Logger
 import net.liftweb.util.IterableFunc
 
-object TBNav extends Logger {
-  
+object TBNav extends TBNav
+trait TBNav extends TBNavBase {
+  def newLiAttribs(oldAttribs: MetaData) = appendToClass(oldAttribs,"dropdown")
+  def newAAttribs(oldAttribs: MetaData) = appendToClass(oldAttribs,"dropdown-toggle")
+                                              .append("data-toggle" -> "dropdown")
+  def newUlAttribs(oldAttribs: MetaData) = appendToClass(oldAttribs,"dropdown-menu")
+  def newAChildren(oldChildren: NodeSeq) = oldChildren ++ <b class="caret"></b>
+}
+
+object TBNavAngularUI extends TBNavAngularUI
+trait TBNavAngularUI extends TBNavBase {
+  def newLiAttribs(oldAttribs: MetaData) = oldAttribs.append("dropdown" -> "")
+  def newAAttribs(oldAttribs: MetaData) = oldAttribs.append("dropdown-toggle" -> "")
+  def newUlAttribs(oldAttribs: MetaData) = appendToClass(oldAttribs,"dropdown-menu")
+  def newAChildren(oldChildren: NodeSeq) = oldChildren ++ <b class="caret"></b>
+}
+
+trait TBNavBase {
   /* Transforms the XML produced by Menu.build such that any menus defined as:
   Menu("Test") / "test" >> LocGroup("test") >> PlaceHolder submenus (
     Menu("Test 2") / "test2",
@@ -19,11 +35,7 @@ object TBNav extends Logger {
   ),
   will be transformed into Twitter Bootstrap dropdown menus
   */
-
-  
-
   def menuToTBNav( in: NodeSeq ) : NodeSeq = {
-
     object t1 extends RewriteRule {
       override def transform(n: Node): Seq[Node] = n match {
 
@@ -138,22 +150,18 @@ object TBNav extends Logger {
   */
   
   // utility methods to add the Bootstrap classes to existing attributes
-  def newLiAttribs(oldAttribs: MetaData) =  appendToClass(oldAttribs,"dropdown")
-  def newAAttribs(oldAttribs: MetaData) = appendToClass(oldAttribs,"dropdown-toggle")
-                                              .append("data-toggle" -> "dropdown")
-  def newUlAttribs(oldAttribs: MetaData) = appendToClass(oldAttribs,"dropdown-menu")
-  def newAChildren(oldChildren: NodeSeq) = oldChildren ++ <b class="caret"></b>
-            
-  
+  def newLiAttribs(oldAttribs: MetaData) : MetaData
+  def newAAttribs(oldAttribs: MetaData) : MetaData
+  def newUlAttribs(oldAttribs: MetaData) : MetaData
+  def newAChildren(oldChildren: NodeSeq) : NodeSeq
 
   // append a new value to the class attribute if one already exists, otherwise create a new class 
   // with the given value
-  def appendToClass(attribs: MetaData, newClass: String ) : MetaData = {
-      // Note that MetaData.get("class") returns a Option[Seq[Node]] , not Option[Node] as might be expected
-      // for an explanation of why see the scala-xml book: 
-      val oldClass : Option[String] = attribs.get("class").map(_.mkString).filterNot(_ == "")
-      val resultingClass = oldClass.map( _.trim + " ").getOrElse("") + newClass
-      attribs.append("class" -> resultingClass)
-    } 
-  
+  def appendToClass(attribs: MetaData, newClass: String) : MetaData = {
+    // Note that MetaData.get("class") returns a Option[Seq[Node]] , not Option[Node] as might be expected
+    // for an explanation of why see the scala-xml book: 
+    val oldClass : Option[String] = attribs.get("class").map(_.mkString).filterNot(_ == "")
+    val resultingClass = oldClass.map( _.trim + " ").getOrElse("") + newClass
+    attribs.append("class" -> resultingClass)
+  } 
 }
